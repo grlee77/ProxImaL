@@ -78,6 +78,7 @@ class ProxFn(object):
         """Wrapper on the prox function to handle alpha, etc.
            It is here the iteration for debug purposese etc.
         """
+        # TODO: further simplify
         rho_hat = (rho + 2 * self.gamma) / (self.alpha * self.beta**2)
         # vhat = (rho*v - c)*beta/(rho + 2*gamma) - b
         # Modify v in-place. This is important for the Python to be performant.
