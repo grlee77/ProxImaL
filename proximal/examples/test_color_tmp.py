@@ -14,6 +14,7 @@ from scipy import ndimage
 import matplotlib.pyplot as plt
 from PIL import Image
 from scipy.misc import lena
+from six.moves import input
 
 ############################################################
 
@@ -40,7 +41,7 @@ print('Running color transform took: {0:.1f}ms'.format(toc()))
 plt.figure()
 mi = np.amin(output)
 ma = np.amax(output)
-print 'Min/Max are: ', mi, ma
+print('Min/Max are: ', mi, ma)
 imgplot = plt.imshow(np.maximum(output, 0.0), interpolation="nearest", clim=(0.0, 1.0))
 imgplot.set_cmap('gray')
 plt.colorbar()
@@ -48,4 +49,4 @@ plt.title('Output from mul_color')
 plt.show()
 
 # Wait until done
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")

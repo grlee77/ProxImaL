@@ -1,3 +1,5 @@
+from __future__ import division
+
 from .lin_op import LinOp
 import numpy as np
 from proximal.utils.utils import Impl, psf2otf, fftd, ifftd
@@ -35,19 +37,24 @@ class conv(LinOp):
                 # Halide FFT (pack into diag)
                 # TODO: FIX IMREAL LATER
                 hsize = arg.shape if len(arg.shape) == 3 else arg.shape + (1,)
-                output_fft_tmp = np.zeros(((hsize[0] + 1) / 2 + 1, hsize[1], hsize[2], 2),
+
+                output_fft_tmp = np.zeros(((hsize[0] + 1) // 2 + 1, hsize[1], hsize[2], 2),
                                           dtype=np.float32, order='F')
-                Halide('fft2_r2c.cpp').fft2_r2c(self.kernel, self.kernel.shape[1] / 2,
-                                                self.kernel.shape[0] / 2, output_fft_tmp)
+                hflags = ['-DWTARGET={0} -DHTARGET={1}'.format(
+                    hsize[1], hsize[0])]  # have to define WTARGET and HTARGET or code fails to compile
+                Halide('fft2_r2c.cpp', compile_flags=hflags).fft2_r2c(
+                    self.kernel, self.kernel.shape[1] // 2,
+                    self.kernel.shape[0] // 2, output_fft_tmp)
                 self.forward_kernel[:] = 0.
 
+                sl = slice((hsize[0] + 1) // 2 + 1)
                 if len(arg.shape) == 2:
-                    self.forward_kernel[0:(hsize[0] + 1) / 2 + 1, ...] = 1j * \
-                                           output_fft_tmp[..., 0, 1]
-                    self.forward_kernel[0:(hsize[0] + 1) / 2 + 1, ...] += output_fft_tmp[..., 0, 0]
+                    self.forward_kernel[sl, ...] = 1j * \
+                        output_fft_tmp[..., 0, 1]
+                    self.forward_kernel[sl, ...] += output_fft_tmp[..., 0, 0]
                 else:
-                    self.forward_kernel[0:(hsize[0] + 1) / 2 + 1, ...] = 1j * output_fft_tmp[..., 1]
-                    self.forward_kernel[0:(hsize[0] + 1) / 2 + 1, ...] += output_fft_tmp[..., 0]
+                    self.forward_kernel[sl, ...] = 1j * output_fft_tmp[..., 1]
+                    self.forward_kernel[sl, ...] += output_fft_tmp[..., 0]
 
             self.tmpout = np.zeros(arg.shape, dtype=np.float32, order='F')
             self.initialized = True

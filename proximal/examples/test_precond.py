@@ -18,6 +18,7 @@ import argparse
 import matplotlib.pyplot as plt
 from PIL import Image
 import cv2
+from six.moves import input
 
 # Load image
 img = Image.open('./data/angela.jpg')  # opens the file using Pillow - it's not an array yet
@@ -95,9 +96,9 @@ op2 = mul_elemwise(op2_d, op2)
 
 stacked_ops = vstack([op1, op2])
 L = est_CompGraph_norm(CompGraph(stacked_ops))
-print "||K||_2 = ", L
+print("||K||_2 = ", L)
 # Quadratic or non quadratic splitting
-print 'Splitting quadratics'
+print('Splitting quadratics')
 
 # print np.linalg.norm(new_x.weight)
 # op1_d /= np.sqrt(L)
@@ -141,37 +142,40 @@ if method == 'pc':
 
     options = cg_options(tol=1e-5, num_iters=100, verbose=True)
     #options = lsqr_options(atol=1e-5, btol=1e-5, num_iters=100, verbose=False)
-    pc(prox_fns, quad_funcs=[], tau=1 / L, sigma=1 / L, theta=1, max_iters=1000 - equil_iters,
-       eps_rel=1e-5, eps_abs=1e-5, lin_solver="cg", lin_solver_options=options,
-       try_split=False, try_diagonalize=diag,
-       metric=psnrval, verbose=verbose, convlog=None)
+    pc.solve(nonquad_fns, quad_funcs, tau=1 / L, sigma=1 / L, theta=1,
+             max_iters=1000 - equil_iters, eps_rel=1e-5, eps_abs=1e-5,
+             lin_solver="cg", lin_solver_options=options,
+             try_diagonalize=diag, metric=psnrval, verbose=verbose,
+             convlog=None)
 
 
 elif method == 'lin-admm':
 
     options = cg_options(tol=1e-5, num_iters=100, verbose=True)
-    lin_admm(prox_fns, quad_funcs=quad_funcs, lmb=0.1, max_iters=300,
-             eps_abs=1e-4, eps_rel=1e-4, lin_solver="cg", lin_solver_options=options,
-             try_diagonalize=diag, metric=psnrval, verbose=verbose)
+    ladmm.solve(nonquad_fns, quad_funcs, lmb=0.1, max_iters=300,
+                eps_abs=1e-4, eps_rel=1e-4, lin_solver="cg",
+                lin_solver_options=options, try_diagonalize=diag,
+                metric=psnrval, verbose=verbose)
 
 elif method == 'admm':
 
     options = cg_options(tol=1e-5, num_iters=100, verbose=True)
-    admm(prox_fns, quad_funcs=[], rho=10, max_iters=300,
-         eps_abs=1e-4, eps_rel=1e-4, lin_solver="cg", lin_solver_options=options,
-         try_diagonalize=diag, metric=psnrval, verbose=verbose)
+    admm.solve(prox_fns, [], rho=10, max_iters=300,
+               eps_abs=1e-4, eps_rel=1e-4, lin_solver="cg",
+               lin_solver_options=options, try_diagonalize=diag,
+               metric=psnrval, verbose=verbose)
 
 elif method == 'hqs':
 
     # Need high accuracy when quadratics are not splitted
     options = cg_options(tol=1e-5, num_iters=100, verbose=True)
-    hqs(prox_fns, lin_solver="cg", lin_solver_options=options,
-        eps_rel=1e-6, max_iters=10, max_inner_iters=10, x0=b,
-        try_diagonalize=diag, metric=psnrval, verbose=verbose)
+    hqs.solve(prox_fns, lin_solver="cg", lin_solver_options=options,
+              eps_rel=1e-6, max_iters=10, max_inner_iters=10, x0=b,
+              try_diagonalize=diag, metric=psnrval, verbose=verbose)
 
-print convlog.objective_val
+print(convlog.objective_val)
 
-print reduce(lambda x, y: x + y, [fn.value for fn in orig_fns])
+print(reduce(lambda x, y: x + y, [fn.value for fn in orig_fns]))
 
 print('Running took: {0:.1f}s'.format(toc() / 1000.0))
 
@@ -183,4 +187,4 @@ plt.title('Result')
 plt.show()
 
 # Wait until done
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")

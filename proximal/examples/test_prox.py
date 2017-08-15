@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from scipy.misc import lena
 import cv2
+from six.moves import input
 
 ############################################################
 
@@ -223,4 +224,4 @@ plt.savefig('prox2.png')
 print('Maximum error NLM (CUDA vs. CPU) {0}'.format(np.amax(np.abs(output - dst))))
 
 # Wait until done
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")

@@ -15,6 +15,7 @@ from scipy import ndimage
 import matplotlib.pyplot as plt
 from PIL import Image
 import cv2
+from six.moves import input
 
 ############################################################
 
@@ -71,9 +72,9 @@ sdlsqrtime = toc() / 1000
 
 tic()
 options = cg_options(tol=1e-5, num_iters=100, verbose=False)
-pc(prox_fns, quad_funcs=quad_funcs, sigma=10.0, max_iters=200,
-   eps=5e-1, lin_solver="cg", lin_solver_options=options,
-   try_diagonalize=False, verbose=True)
+pc.solve(prox_fns, quad_funcs, sigma=10.0, max_iters=200,
+         eps_rel=5e-1, lin_solver="cg", lin_solver_options=options,
+         try_diagonalize=False, verbose=True)
 sdcgtime = toc() / 1000
 
 plt.figure()
@@ -85,9 +86,9 @@ plt.show()
 
 # Sparse gradient deconvolution with quadratic definition
 tic()
-pc(prox_fns, quad_funcs=quad_funcs, sigma=10.0, max_iters=200,
-   eps=5e-1, lin_solver="cg", lin_solver_options=options,
-   try_diagonalize=True, verbose=True)
+pc.solve(prox_fns, quad_funcs, sigma=10.0, max_iters=200,
+         eps_rel=5e-1, lin_solver="cg", lin_solver_options=options,
+         try_diagonalize=True, verbose=True)
 fdtime = toc() / 1000
 
 plt.figure()
@@ -103,4 +104,4 @@ print('Running in SPATIAL (CG, warm start) domain: {0:.1f}sec'.format(sdcgtime))
 print('Running in FREQUENCY domain: {0:.1f}sec\n'.format(fdtime))
 
 # Wait until done
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")

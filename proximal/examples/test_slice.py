@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 from scipy.misc import lena
+from six.moves import input
 
 ############################################################
 
@@ -23,7 +24,7 @@ np_img = im2nparray(img)
 #np_img = np.mean( np_img, axis=2)
 np_img = np.asfortranarray(np.tile(np_img[..., np.newaxis], (1, 1, 1, 3)))
 
-print 'Type ', np_img.dtype, 'Shape', np_img.shape
+print('Type ', np_img.dtype, 'Shape', np_img.shape)
 
 plt.ion()
 plt.figure()
@@ -39,7 +40,7 @@ mask = np.asfortranarray(np.random.randn(*list(np_img.shape[0:3])).astype(np.flo
 mask = np.maximum(mask, 0.)
 #mask[mask < 0.5] = 0.
 #mask[mask >= 0.5] = 1.
-print 'Type ', mask.dtype, 'Shape mask', mask.shape
+print('Type ', mask.dtype, 'Shape mask', mask.shape)
 
 # Recompile
 # Halide('A_mask.cpp', recompile=True) #Call
@@ -63,4 +64,4 @@ print('Running mask in scipy took: {0:.1f}ms'.format(toc()))
 print('Maximum error {0}'.format(np.amax(np.abs(output_ref - output))))
 
 # Wait until done
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")

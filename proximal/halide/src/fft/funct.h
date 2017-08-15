@@ -8,13 +8,13 @@
 
 template <typename T>
 class FuncRefVarT : public T {
-    Halide::FuncRefVar untyped;
+    Halide::FuncRef untyped;
 
 public:
     typedef Halide::Stage Stage;
     typedef Halide::Tuple Tuple;
 
-    FuncRefVarT(const Halide::FuncRefVar& untyped)
+    FuncRefVarT(const Halide::FuncRef& untyped)
         : T(untyped.function().has_pure_definition() ? T(Tuple(untyped)) : T()),
             untyped(untyped) {}
 
@@ -27,13 +27,13 @@ public:
 
 template <typename T>
 class FuncRefExprT : public T {
-    Halide::FuncRefExpr untyped;
+    Halide::FuncRef untyped;
 
 public:
     typedef Halide::Stage Stage;
     typedef Halide::Tuple Tuple;
 
-    FuncRefExprT(const Halide::FuncRefExpr& untyped)
+    FuncRefExprT(const Halide::FuncRef& untyped)
         : T(Tuple(untyped)), untyped(untyped) {}
 
     Stage operator=(T x) { return untyped = x; }
