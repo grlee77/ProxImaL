@@ -307,8 +307,10 @@ def gengen(generator_source, builddir='./build',
         return output_lib, function_name_c, argument_names
 
     except Exception as e:
-        print('Error genererator compilation: {0}'.format(e.message), file=sys.stderr)
-        exit()
+        # print('Error genererator compilation: {0}'.format(e.message), file=sys.stderr)
+        # print('Error genererator compilation: {0}'.format(e), file=sys.stderr)
+        raise(e)
+        # exit()
 
     finally:
         # Cleanup
@@ -324,7 +326,6 @@ def convert_to_ctypes(args, func):
 
     # pass numpy buffers using ctypes
     cargs = []
-    try:
 
         # Iterate over the args and convert
         for arg in args:
@@ -369,8 +370,8 @@ def convert_to_ctypes(args, func):
                 raise ValueError('Unsupported type.')
 
     except Exception as e:
-        print('Error argument conversion: {0} in func {1}'.format(e.message, func), file=sys.stderr)
-        exit()
+        print('Error in argument conversion for func: {1}:'.format(func))
+        raise(e)
 
     return cargs
 

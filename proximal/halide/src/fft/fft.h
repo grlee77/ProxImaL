@@ -14,7 +14,7 @@
 #include "complex.h"
 #include <Halide.h>
 
-#include "funct.h"
+//#include "funct.h"
 
 using std::vector;
 using std::string;

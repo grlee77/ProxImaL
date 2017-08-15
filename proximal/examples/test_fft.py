@@ -130,8 +130,8 @@ hflags = ['-DWTARGET={0} -DHTARGET={1}'.format(hsize[1], hsize[0])]
 #Halide('ifft2_c2r.cpp', compile_flags=hflags, recompile=True)
 
 tic()
-Halide('fft2_r2c.cpp', compile_flags=hflags).fft2_r2c(np_img, 0, 0, output_fft)  # Call
-Halide('fft2_r2c.cpp', compile_flags=hflags).fft2_r2c(
+Halide('fft2_r2c.cpp', compile_flags=hflags, recompile=True).fft2_r2c(np_img, 0, 0, output_fft)  # Call
+Halide('fft2_r2c.cpp', compile_flags=hflags, recompile=True).fft2_r2c(
     K, K.shape[1] / 2, K.shape[0] / 2, output_kfft)  # Call
 
 
@@ -145,7 +145,7 @@ Kmultres = Khat * np_imghat
 Khat = np.asfortranarray(np.stack((Kmultres.real, Kmultres.imag), axis=-1))
 #Kx_fft = complex_mult(output_fft, output_kfft)
 
-Halide('ifft2_c2r.cpp', compile_flags=hflags).ifft2_c2r(Khat, output_Kf)  # Call
+Halide('ifft2_c2r.cpp', compile_flags=hflags, recompile=True).ifft2_c2r(Khat, output_Kf)  # Call
 
 print('Running Halide FFT took: {0:.1f}ms'.format(toc()))
 
