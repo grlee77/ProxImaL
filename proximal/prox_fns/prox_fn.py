@@ -37,6 +37,8 @@ class ProxFn(object):
             self.b = b * np.ones(self.lin_op.shape)
         if np.isscalar(c):
             self.c = c * np.ones(self.lin_op.shape)
+        self._b_is_zeros = np.all(self.b == 0)
+        self._c_is_zeros = np.all(self.c == 0)
         self.gamma = float(gamma)
         self.d = float(d)
         self.init_tmps()
@@ -80,14 +82,21 @@ class ProxFn(object):
         # vhat = (rho*v - c)*beta/(rho + 2*gamma) - b
         # Modify v in-place. This is important for the Python to be performant.
         v *= rho
-        v -= self.c
-        v *= self.beta / (rho + 2 * self.gamma)
-        v -= self.b
+        if not self._c_is_zeros:
+            v -= self.c
+        if self.gamma != 0:
+            v *= self.beta / (rho + 2 * self.gamma)
+        else:
+            v *= self.beta / rho
+        if not self._b_is_zeros:
+            v -= self.b
         xhat = self._prox(rho_hat, v, *args, **kwargs)
         # x = (xhat + b)/beta
         # Modify result in-place.
-        xhat += self.b
-        xhat /= self.beta
+        if not self._b_is_zeros:
+            xhat += self.b
+        if self.beta != 1:
+            xhat /= self.beta
         return xhat
 
     def cuda_additional_buffers(self):
@@ -232,8 +241,23 @@ __global__ void prox(const float *v, float *xhat, float rho %(argstring)s)
     def eval(self, v):
         """Evaluate the function on v.
         """
-        return self.alpha * self._eval(self.beta * v - self.b) + \
-            np.sum(self.c * v) + self.gamma * np.square(v).sum() + self.d
+        if self.beta == 1:
+            r = self._eval(v)
+        else:
+            r = self._eval(self.beta * v)
+        if self._b_is_zeros:
+            r -= self.b
+        if self.alpha != 1:
+            r *= self.alpha
+        if self._c_is_zeros:
+            r += np.sum(self.c * v)
+        if self.gamma != 0:
+            r += self.gamma * np.square(v).sum()
+        if self.d != 0:
+            r += self.d
+        return r
+        # return self.alpha * self._eval(self.beta * v - self.b) + \
+        #     np.sum(self.c * v) + self.gamma * np.square(v).sum() + self.d
 
     @property
     def value(self):
