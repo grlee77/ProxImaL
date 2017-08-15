@@ -16,6 +16,7 @@ from scipy import ndimage
 import matplotlib.pyplot as plt
 from PIL import Image
 import cv2
+from six.moves import input
 
 ############################################################
 
@@ -124,8 +125,9 @@ options = cg_options(tol=1e-5, num_iters=100, verbose=False)
 #options = lsqr_options(atol=1e-5, btol=1e-5, num_iters=100, verbose=False)
 tic()
 
-pc(prox_fns, quad_funcs=quad_funcs, tau=0.088, sigma=1.000, theta=1.000, max_iters=100,
-   eps=1e-2, lin_solver="cg", lin_solver_options=options, metric=None, verbose=1)
+pc.solve(nonquad_fns, quad_funcs, tau=0.088, sigma=1.000, theta=1.000,
+         max_iters=100, eps_rel=1e-2, eps_abs=1e-2, lin_solver="cg",
+         lin_solver_options=options, metric=None, verbose=1)
 
 print('Overall solver took: {0:.1f}ms'.format(toc()))
 
@@ -138,4 +140,4 @@ plt.title('Results from Scipy')
 plt.show()
 
 # Wait until done
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")

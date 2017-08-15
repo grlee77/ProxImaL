@@ -15,6 +15,7 @@ from scipy import signal
 import matplotlib.pyplot as plt
 from PIL import Image
 import cv2
+from six.moves import input
 
 ############################################################
 
@@ -56,8 +57,10 @@ plt.show()
 
 # Now test the solver with some sparse gradient deconvolution
 x = Variable(x.shape)
-prox_fns = [nonneg(x), sum_squares(conv(K, x), b=b, alpha=5000)]
-hqs(prox_fns, eps_rel=1e-6, max_iters=100, max_inner_iters=10, x0=b, verbose=True)
+psi_fns = [nonneg(x), ]
+omega_fns = [sum_squares(conv(K, x), b=b, alpha=5000), ]
+hqs.solve(psi_fns, omega_fns, eps_rel=1e-6, max_iters=100,
+          max_inner_iters=10, x0=b, verbose=True)
 
 plt.figure()
 imgplot = plt.imshow(x.value, interpolation="nearest", clim=(0.0, 1.0))
@@ -69,4 +72,4 @@ plt.show()
 print('Minimum {0}', np.amin(x.value))
 
 # Wait until done
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")

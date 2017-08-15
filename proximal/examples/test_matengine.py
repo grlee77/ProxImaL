@@ -11,6 +11,7 @@ import cv2
 
 import matlab.engine
 import StringIO
+from six.moves import input
 
 ############################################################
 
@@ -29,7 +30,7 @@ eng.addpath(r'../../apps/poisson/hyperlaplacian_code', nargout=0)
 # print result.shape, ' ', result.dtype
 
 result = np.array(eng.deblurring_launch_single_poisson_test())
-print result.shape, ' ', result.dtype
+print(result.shape, ' ', result.dtype)
 
 # Show result
 plt.ion()
@@ -43,4 +44,4 @@ plt.show()
 eng.quit()
 
 # Wait until done
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")

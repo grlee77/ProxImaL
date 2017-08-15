@@ -1,4 +1,4 @@
-
+from __future__ import division
 
 # Proximal
 import sys
@@ -14,6 +14,7 @@ from PIL import Image
 from scipy.misc import lena
 from numpy.fft import fftn, ifftn
 import cv2
+from six.moves import input
 
 
 def complex_mult(a, b):
@@ -34,7 +35,7 @@ img = Image.open('./data/angela_large.jpg')  # opens the file using Pillow - it'
 
 np_img = np.asfortranarray(im2nparray(img))
 np_img = np.mean(np_img, axis=2)
-print 'Type ', np_img.dtype, 'Shape', np_img.shape
+print('Type ', np_img.dtype, 'Shape', np_img.shape)
 
 plt.ion()
 plt.figure()
@@ -119,7 +120,7 @@ if len(np_img.shape) == 2:
     K = np.asfortranarray(K[..., np.newaxis])
 
 hsize = np_img.shape
-output_fft = np.zeros(((hsize[0] + 1) / 2 + 1, hsize[1], hsize[2], 2), dtype=np.float32, order='F')
+output_fft = np.zeros(((hsize[0] + 1) // 2 + 1, hsize[1], hsize[2], 2), dtype=np.float32, order='F')
 output_kfft = np.zeros_like(output_fft)
 output_Kf = np.zeros_like(np_img)
 hflags = ['-DWTARGET={0} -DHTARGET={1}'.format(hsize[1], hsize[0])]
@@ -183,6 +184,6 @@ print('Maximum Halide FFT error {0}'.format(np.amax(np.abs(output_Kf - Kx_fft_re
 # plt.show()
 
 # Wait until done
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")
 
-exit()
+sys.exit()

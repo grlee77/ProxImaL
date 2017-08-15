@@ -14,9 +14,9 @@ from scipy import ndimage
 import matplotlib.pyplot as plt
 from PIL import Image
 import cv2
+from six.moves import input
 
-import matlab.engine
-import StringIO
+# import matlab.engine
 
 ############################################################
 
@@ -53,7 +53,7 @@ plt.show()
 # method = matlab.double([2])
 # result = np.array( eng.function_stdEst2D(vmat, method) )
 # eng.quit()
-# print 'Matlab Estimate:', result
+# print('Matlab Estimate:', result)
 
 # Estimate the noise
 tic()
@@ -64,4 +64,4 @@ print('Estimation took: {0:.1f}ms'.format(toc()))
 print('Noise estimate is: {0:1.4f}, Original was {1:1.4f}'.format(np.mean(ndev), sigma_noise))
 
 # Wait until done
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")

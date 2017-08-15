@@ -27,7 +27,7 @@ img = Image.open('./data/largeimage.png')  # opens the file using Pillow - it's 
 
 np_img = np.asfortranarray(im2nparray(img))
 np_img = np.mean(np_img, axis=2)
-print 'Img Type ', np_img.dtype, 'Shape', np_img.shape
+print('Img Type ', np_img.dtype, 'Shape', np_img.shape)
 
 plt.ion()
 plt.figure()
@@ -44,7 +44,7 @@ plt.show()
 # Test the runner
 output = np.zeros((np_img.shape[0], np_img.shape[1], np_img.shape[2] if (
     len(np_img.shape) > 2) else 1, 2), dtype=np.float32, order='FORTRAN')
-print 'Out Type ', output.dtype, 'Shape', output.shape
+print('Out Type ', output.dtype, 'Shape', output.shape)
 
 tic()
 hl = Halide('A_grad.cpp', recompile=True, verbose=False, cleansource=True)  # Force recompile

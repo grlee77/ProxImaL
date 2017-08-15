@@ -15,6 +15,7 @@ from scipy import ndimage
 import matplotlib.pyplot as plt
 from PIL import Image
 import cv2
+from six.moves import input
 
 ############################################################
 
@@ -68,7 +69,7 @@ quad_funcs = []
 
 
 # Method options
-method = 'lin-admm'
+method = 'ladmm'
 diag = True
 verbose = 1
 options = cg_options(tol=1e-5, num_iters=100, verbose=False)
@@ -76,27 +77,29 @@ options = cg_options(tol=1e-5, num_iters=100, verbose=False)
 tic()
 if method == 'pc':
 
-    pc(prox_fns, quad_funcs=quad_funcs, tau=None, sigma=None, theta=None, max_iters=100,
-       eps=1e-2, lin_solver="cg", lin_solver_options=options,
-       try_diagonalize=diag, verbose=verbose)
+    pc.solve(prox_fns, quad_funcs, tau=None, sigma=None, theta=None,
+             max_iters=100, eps_rel=1e-2, lin_solver="cg",
+             lin_solver_options=options, try_diagonalize=diag, verbose=verbose)
 
-elif method == 'lin-admm':
+elif method == 'ladmm':
 
-    lin_admm(prox_fns, quad_funcs=quad_funcs, lmb=1, max_iters=100,
-             eps_abs=1e-4, eps_rel=1e-4, lin_solver="cg", lin_solver_options=options,
-             try_diagonalize=diag, verbose=verbose)
+    ladmm.solve(prox_fns, quad_funcs, lmb=1, max_iters=100,
+                eps_abs=1e-4, eps_rel=1e-4, lin_solver="cg",
+                lin_solver_options=options, try_diagonalize=diag,
+                verbose=verbose)
 
 elif method == 'admm':
 
-    admm(prox_fns, quad_funcs=quad_funcs, rho=1, max_iters=100,
-         eps_abs=1e-4, eps_rel=1e-4, lin_solver="cg", lin_solver_options=options,
-         try_diagonalize=diag, verbose=verbose)
+    admm.solve(prox_fns, quad_funcs=quad_funcs, rho=1, max_iters=100,
+               eps_abs=1e-4, eps_rel=1e-4, lin_solver="cg",
+               lin_solver_options=options, try_diagonalize=diag,
+               verbose=verbose)
 
 elif method == 'hqs':
 
-    hqs(prox_fns, lin_solver="cg", lin_solver_options=options,
-        eps_rel=1e-6, max_iters=10, max_inner_iters=10, x0=b,
-        try_diagonalize=diag, verbose=verbose)
+    hqs.solve(prox_fns, lin_solver="cg", lin_solver_options=options,
+              eps_rel=1e-6, max_iters=10, max_inner_iters=10, x0=b,
+              try_diagonalize=diag, verbose=verbose)
 
 print('Running took: {0:.1f}s'.format(toc() / 1000.0))
 
@@ -109,4 +112,4 @@ plt.title('Results from Scipy')
 plt.show()
 
 # Wait until done
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")

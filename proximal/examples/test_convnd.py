@@ -14,6 +14,7 @@ from scipy import ndimage
 import matplotlib.pyplot as plt
 from PIL import Image
 from scipy.misc import lena
+from six.moves import input
 
 ############################################################
 
@@ -74,4 +75,4 @@ plt.show()
 print('Maximum error correlation {0}'.format(np.amax(np.abs(output_scipy - output_ref))))
 
 # Wait until done
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")

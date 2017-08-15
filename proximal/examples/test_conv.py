@@ -14,6 +14,7 @@ from scipy import ndimage
 import matplotlib.pyplot as plt
 from PIL import Image
 from scipy.misc import lena
+from six.moves import input
 
 ############################################################
 
@@ -25,7 +26,7 @@ img = Image.open('./data/angela.jpg')  # opens the file using Pillow - it's not 
 
 np_img = np.asfortranarray(im2nparray(img))
 np_img = np.mean(np_img, axis=2)
-print 'Type ', np_img.dtype, 'Shape', np_img.shape
+print('Type ', np_img.dtype, 'Shape', np_img.shape)
 
 plt.ion()
 plt.figure()
@@ -38,6 +39,9 @@ tic()
 Halide('A_conv.cpp', recompile=True, verbose=False,
        cleansource=True)  # Force recompile in local dir
 print('Compilation took: {0:.1f}ms'.format(toc()))
+
+# Halide('fft2_r2c.cpp')
+
 
 # Test the runner
 output = np.zeros_like(np_img)
@@ -106,4 +110,4 @@ print('Running transpose conv fft convolution took: {0:.1f}ms'.format(toc()))
 print('Maximum error correlation {0}'.format(np.amax(np.abs(output_corr_ref - output_corr))))
 
 # Wait until done
-raw_input("Press Enter to continue...")
+input("Press Enter to continue...")
