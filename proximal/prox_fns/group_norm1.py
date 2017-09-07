@@ -16,7 +16,10 @@ class group_norm1(ProxFn):
         """Initialize temporary variables for _prox method.
         """
         self.group_dims = group_dims
-        self.v_group_norm = np.zeros(lin_op.shape, dtype=float)
+        self.v_sq = np.empty(lin_op.shape, dtype=float)
+        norm_shape = tuple([s if axis in self.group_dims else 1
+                            for axis, s in enumerate(lin_op.shape)])
+        self.v_group_norm = np.empty(norm_shape, dtype=float)
 
         # Temp array for halide
         self.tmpout = None
@@ -49,41 +52,30 @@ class group_norm1(ProxFn):
         else:
 
             # Numpy implementation
-            np.multiply(v, v, self.v_group_norm)
-            
+            np.multiply(v, v, self.v_sq)
 
             # Sum along dimensions and keep dimensions
-            orig_s = v.shape
-            for d in self.group_dims:
-                self.v_group_norm = np.sum(self.v_group_norm, axis=d, keepdims=True)
+            self.v_group_norm = np.sum(self.v_sq,
+                                       axis=tuple(self.group_dims),
+                                       keepdims=True)
 
             # Sqrt
             np.sqrt(self.v_group_norm, self.v_group_norm)
 
-            # Replicate
-            tiles = ()
-            for d in range(len(orig_s)):
-                if d in self.group_dims:
-                    tiles += (orig_s[d],)
-                else:
-                    tiles += (1,)
-
-            self.v_group_norm = np.tile(self.v_group_norm, tiles)
-            
             # Thresholded group norm
             with np.errstate(divide='ignore'):
                 np.maximum(0.0, 1.0 - (1.0 / rho) * (1.0 / self.v_group_norm), self.v_group_norm)
-            
+
             # Mult
             v *= self.v_group_norm
 
         return v
-    
+
     def _prox_cuda(self, rho, gen_v, subidx, linidx, res):
         code = """/*group_norm1*/
 float %(res)s = 0.0f;
 float tmp;
-""" % locals()        
+""" % locals()
         for gd in itertools.product( *(range(self.lin_op.shape[d]) for d in self.group_dims) ):
             newidx = subidx[:]
             for i,d in enumerate(self.group_dims):
@@ -107,7 +99,7 @@ if( %(res)s > 0.0f )
 %(res)s *= %(v)s;
 """ % locals()
         return code
-    
+
     def _eval(self, v):
         """Evaluate the function on v (ignoring parameters).
         """
@@ -149,36 +141,26 @@ class weighted_group_norm1(group_norm1):
         """
 
         # Square
-        np.multiply(v, v, self.v_group_norm)
+        np.multiply(v, v, self.v_sq)
 
         # Sum along dimensions and keep dimensions
-        orig_s = v.shape
-        for d in self.group_dims:
-            self.v_group_norm = np.sum(self.v_group_norm, axis=d, keepdims=True)
-
+        self.v_group_norm = np.sum(self.v_sq,
+                                   axis=tuple(self.group_dims),
+                                   keepdims=True)
         # Sqrt
         np.sqrt(self.v_group_norm, self.v_group_norm)
-
-        # Replicate
-        tiles = ()
-        for d in range(len(orig_s)):
-            if d in self.group_dims:
-                tiles += (orig_s[d],)
-            else:
-                tiles += (1,)
-
-        self.v_group_norm = np.tile(self.v_group_norm, tiles)
 
         # Thresholded group norm
         with np.errstate(divide='ignore'):
             np.maximum(0.0, 1.0 - (np.absolute(self.weight) / rho) *
                        (1.0 / self.v_group_norm), self.v_group_norm)
 
-        # Mult
-        idxs = self.weight != 0
-        v[idxs] *= self.v_group_norm[idxs]
+        # Mult (re-use self.v_sq here to avoid new allocation)
+        np.multiply(self.weight, self.v_group_norm, out=self.v_sq)
+        v *= self.v_sq
+
         return v
-    
+
     def _eval(self, v):
         """Evaluate the function on v (ignoring parameters).
         """
